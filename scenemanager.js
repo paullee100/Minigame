@@ -12,8 +12,8 @@ class SceneManager {
         this.x = 0;
         this.y = 0;
         this.player = new Player(this.game, 500, 500)
-        this.game.addEntity(this.player);
-        this.game.addEntity(new Slime(this.game, 200, 200, this.player));
+        // this.game.addEntity(this.player);
+        // this.game.addEntity(new Slime(this.game, 200, 200, this.player));
     };
 
     clearEntities() {
@@ -28,15 +28,18 @@ class SceneManager {
         this.x = this.player.x - midpointwidth;
         this.y = this.player.y - midpointheight;
 
-        if (this.player.health <= 0) {
-            this.waitTime += this.game.clockTick;
-            if (this.waitTime >= 0.5) {
-                this.clearEntities();
-                this.gameOver = true;
-            }
-        }
+        if (!this.title) {
 
-        this.spawnSlime();
+            if (this.player.health <= 0) {
+                this.waitTime += this.game.clockTick;
+                if (this.waitTime >= 0.5) {
+                    this.clearEntities();
+                    this.gameOver = true;
+                }
+            }
+
+            this.spawnSlime();
+        }
     };
 
     spawnSlime() {
@@ -57,20 +60,43 @@ class SceneManager {
     };
 
     draw(ctx) {
+        let canvas = document.getElementById("gameWorld");
+        canvas.style.backgroundColor = "green";
 
         if (this.title) {
+            ctx.font = "130px serif";
+            ctx.fillStyle = "White";
+            ctx.fillText("Survival Game", this.x + 75, this.y);
+
+            ctx.font = "130px serif";
+            ctx.fillText("Controls:", this.x + 240, this.y + 180)
+
+            ctx.font = "50px serif";
+            ctx.fillText("W/Up Arrow - Move Up", this.x + 150, this.y + 260);
+            ctx.fillText("S/Down Arrow - Move Down", this.x + 150, this.y + 310);
+            ctx.fillText("A/Left Arrow - Move Left", this.x + 150, this.y + 360);
+            ctx.fillText("D/Right Arrow - Move Right", this.x + 150, this.y + 410);
+            ctx.fillText("Mouse click - Attack", this.x + 150, this.y + 460);
+
+            ctx.fillText("Press F to play", this.x + 275, this.y + 575);
+
+            if (this.game.keys["F"] || this.game.keys["f"]) {
+                this.title = false;
+                this.game.addEntity(this.player);
+                this.game.addEntity(new Slime(this.game, 200, 200, this.player));
+            }
 
         } else if (this.gameOver) {
-            ctx.font = "bold 180px Comic Sans MS";
-            ctx.strokeStyle = "White";
+            ctx.font = "180px serif";
+            ctx.fillStyle = "White";
             ctx.lineWidth = 2;
-            ctx.strokeText("Game Over!", (this.x + 15) - this.x, (this.y + 180)- this.y);
+            ctx.fillText("Game Over!", (this.x + 50) - this.x, (this.y + 180)- this.y);
 
-            ctx.font = "bold 45px Comic Sans MS";
-            ctx.strokeText("You scored: " + this.score + " points", (this.x + 15) - this.x, (this.y + 340) - this.y);
+            ctx.font = "90px serif";
+            ctx.fillText("You scored: " + this.score + " points", (this.x + 140) - this.x, (this.y + 340) - this.y);
         
-            ctx.font = "bold 50px Comic Sans MS";
-            ctx.strokeText("Press \"space bar\" to try again", (this.x + 120) - this.x, (this.y + 600) - this.y);
+            ctx.font = "80px serif";
+            ctx.fillText("Press \"space bar\" to try again", (this.x + 45) - this.x, (this.y + 600) - this.y);
         
             if (this.game.keys[" "]) {
                 this.gameOver = false;
@@ -84,10 +110,12 @@ class SceneManager {
                 this.y = 0; 
             }
         } else {
-            ctx.font = "bold 90px Comic Sans MS";
-            ctx.strokeStyle = "White";
+            ctx.font = "90px serif";
+            ctx.fillStyle = "White";
             ctx.lineWidth = 2;
-            ctx.strokeText("Score: " + this.score, (this.x + 30) - this.x, (this.y + 100) - this.y);
+            ctx.fillText("Score: " + this.score, (this.x + 30) - this.x, (this.y + 100) - this.y);
+
+            ctx.fillText("Health: " + this.player.health, (this.x + 30) - this.x, (this.y + 200) - this.y);
         }
     };
 };

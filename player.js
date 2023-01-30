@@ -53,6 +53,7 @@ class Player {
             if (this.health <= 0) {
                 this.velocity.x = 0;
                 this.velocity.y = 0;
+                this.health = 0;
                 this.state = 3;
                 this.deathCounter += TICK;
                 if (this.deathCounter >= 0.25) {
@@ -76,13 +77,27 @@ class Player {
             } else if (this.game.keys["s"] || this.game.keys["S"] || this.game.keys["ArrowDown"]) { // move down
                 this.state = 1;
                 this.velocity.y = RUN;
-            } else if (this.game.keys["k"] || this.game.keys["K"] || this.game.click) { // attack
+            } else if (this.game.click) { // attack
                 this.state = 2
             } else {
                 this.state = 0;
                 this.velocity.x = 0;
                 this.velocity.y = 0;
             };
+
+            let secret = false;
+            if (this.game.keys["K"] && this.game.keys["Z"]) {
+                secret = true;
+            };
+
+            if (secret == true) {
+                this.game.entities.forEach(entity => {
+                    if (entity instanceof Slime) {
+                        entity.health -= 50;
+                    }
+                })
+                secret = false;
+            }
 
             this.x += this.velocity.x * TICK;
             this.y += this.velocity.y * TICK;
@@ -110,9 +125,6 @@ class Player {
     };
 
     draw(ctx) {
-        let canvas = document.getElementById("gameWorld");
-        canvas.style.backgroundColor = "green";
-
         ctx.strokeStyle = "red";
         ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 80, 110);
 
