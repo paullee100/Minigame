@@ -4,7 +4,7 @@ class Slime {
 
 
         let dist = getDistance(this, this.player);
-        this.maxSpeed = 250;
+        this.maxSpeed = 125;
         this.velocity = {x: (this.player.x - this.x) / dist * this.maxSpeed, y: (this.player.y - this.y) / dist * this.maxSpeed};
         this.state = 0; // idle = 0, walk = 1, attack = 2, hurt = 3, dead = 4
         this.facing = 1; // right = 1, left = -1
@@ -38,7 +38,7 @@ class Slime {
 
     updateBB() {
         this.lastBB = this.BB;
-        this.BB = new BoundingBox(this.x, this.y, 90, 65);
+        this.BB = new BoundingBox(this.x, this.y, 18 * PARAMS.SCALE, 13 * PARAMS.SCALE);
     };
 
     update() {
@@ -84,7 +84,6 @@ class Slime {
                     if (this.animation[this.state].isDone()) {
                         if (entity.BB && this.BB.collide(entity.BB)) {
                             entity.health -= 10;
-                            console.log(entity.health);
                         }
                         let tempState = this.state;
                         this.state = 1;
@@ -99,7 +98,7 @@ class Slime {
 
     draw(ctx) {
         ctx.strokeStyle = "red";
-        ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 90, 65);
+        ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 18 * PARAMS.SCALE, 13 * PARAMS.SCALE);
 
         if (this.facing == -1) {
             ctx.save();
@@ -112,16 +111,16 @@ class Slime {
         let stateModX = 0;
         let stateModY = 0;
 
-        if (this.state == 2) stateModY = 50;
-        else if (this.state == 3) stateModY = 28;
-        else if (this.state == 4) stateModY = 43;
+        if (this.state == 2) stateModY = 10 * PARAMS.SCALE;
+        else if (this.state == 3) stateModY = 5.6 * PARAMS.SCALE;
+        else if (this.state == 4) stateModY = 8.6 * PARAMS.SCALE;
     
         if (this.dead == true) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         } else if (this.facing == 1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         } else if (this.facing == -1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - 90 + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - (18 * PARAMS.SCALE) + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         }
 
         ctx.restore();

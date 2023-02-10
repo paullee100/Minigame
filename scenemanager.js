@@ -12,15 +12,38 @@ class SceneManager {
         this.x = 0;
         this.y = 0;
         this.player = new Player(this.game, 500, 500)
-        // this.game.addEntity(this.player);
-        // this.game.addEntity(new Slime(this.game, 200, 200, this.player));
+    };
+
+    loadLevel(level) {
+        this.title = false;
+        this.game.addEntity(this.player);
+
+        if (level.Fence) {
+            for (let i = 0; i < level.Fence.length; i++) {
+                let fence = level.Fence[i];
+                console.log(fence.y);
+                this.game.addEntity(new Fence(this.game, fence.x, fence.y, fence.state));
+            }
+        }
+
+        if (level.Ground) {
+            for (let i = 0; i < level.Ground.length; i++) {
+                let ground = level.Ground[i];
+                for (let row = 0; row < ground.size; row++) {
+                    for (let col = 0; col < ground.size; col++) {
+                        console.log(PARAMS.BLOCKWIDTH);
+                        this.game.addEntity(new Ground(this.game, ground.sprite, ground.x + col * PARAMS.BLOCKWIDTH, ground.y + row * PARAMS.BLOCKWIDTH));
+                    }
+                }
+            }
+        }
     };
 
     clearEntities() {
         this.game.entities.forEach((entity) => {
             entity.removeFromWorld = true;
         });
-    }
+    };
 
     update() {
         let midpointwidth = PARAMS.CANVAS_WIDTH / 2 - PARAMS.BLOCKWIDTH / 2;
@@ -53,7 +76,7 @@ class SceneManager {
                     rand *= -1;
                 }
 
-                this.game.addEntity(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player));
+                this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player), 1);
                 this.spawnTime = 0;
             }
         }
@@ -61,7 +84,7 @@ class SceneManager {
 
     draw(ctx) {
         let canvas = document.getElementById("gameWorld");
-        canvas.style.backgroundColor = "green";
+        canvas.style.backgroundColor = "black";
 
         if (this.title) {
             ctx.font = "130px serif";
@@ -81,9 +104,7 @@ class SceneManager {
             ctx.fillText("Press F to play", this.x + 275, this.y + 575);
 
             if (this.game.keys["F"] || this.game.keys["f"]) {
-                this.title = false;
-                this.game.addEntity(this.player);
-                this.game.addEntity(new Slime(this.game, 200, 200, this.player));
+                this.loadLevel(level);
             }
 
         } else if (this.gameOver) {
@@ -100,14 +121,15 @@ class SceneManager {
         
             if (this.game.keys[" "]) {
                 this.gameOver = false;
-                this.game.addEntity(this.player);
                 this.player.removeFromWorld = false;
                 this.player.health = 300;
                 this.player.dead = false;
                 this.player.state = 0;
                 this.score = 0;
                 this.x = 0;
-                this.y = 0; 
+                this.y = 0;
+
+                this.loadLevel(level);
             }
         } else {
             ctx.font = "90px serif";

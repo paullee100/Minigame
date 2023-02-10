@@ -76,6 +76,10 @@ class GameEngine {
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
     };
 
+    addEntityAtIndex(entity, index) {
+        this.entities.splice(index, 0, entity);
+    };
+
     addEntity(entity) {
         this.entities.push(entity);
     };

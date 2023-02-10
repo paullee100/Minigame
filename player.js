@@ -34,14 +34,14 @@ class Player {
 
         if (this.state == 2) {
             if (this.facing == 1) {
-                this.SwordBB = new BoundingBox(this.x + 80, this.y, 100, 110);
+                this.SwordBB = new BoundingBox((this.x + (16 * PARAMS.SCALE)), this.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
             } else if (this.facing == -1) {
-                this.SwordBB = new BoundingBox(this.x - 100, this.y, 100, 110);
+                this.SwordBB = new BoundingBox((this.x - (20 * PARAMS.SCALE)), this.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
             }
         } else {
             this.SwordBB = new BoundingBox(0, 0, 0, 0);
         }
-        this.BB = new BoundingBox(this.x, this.y, 80, 110);
+        this.BB = new BoundingBox(this.x, this.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
     };
 
@@ -126,12 +126,12 @@ class Player {
 
     draw(ctx) {
         ctx.strokeStyle = "red";
-        ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 80, 110);
+        ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
         ctx.strokeStyle = "purple";
-        ctx.strokeRect((this.x + 80) - this.game.camera.x, this.y - this.game.camera.y, 100, 110);
+        ctx.strokeRect((this.x + (16 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
-        ctx.strokeRect((this.x - 100) - this.game.camera.x, this.y - this.game.camera.y, 100, 110);
+        ctx.strokeRect((this.x - (20 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
         if (this.facing == -1) {
             ctx.save();
@@ -145,11 +145,11 @@ class Player {
         let stateModY = 0;
 
         if (this.dead == true) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         } else if (this.facing == 1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         } else if (this.facing == -1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - 80 + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, 5);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - (16 * PARAMS.SCALE) + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
         }
         ctx.restore();
     };
