@@ -4,6 +4,7 @@ class Player {
 
         this.velocity = {x: 0, y: 0};
         this.health = 300;
+        this.maxhealth = 300;
         this.damage = 1;
         this.facing = 1; // right = 1, left = -1
         this.state = 0; // idle = 0, walk = 1, attack = 2, dead = 3
@@ -110,6 +111,29 @@ class Player {
                         entity.state = 3;
                     }
                 }
+                
+                if (entity.BB && this.BB.collide(entity.BB)) {
+                    if (entity instanceof Fence) {
+                        if (entity.state == 4) {
+                            if (this.BB.left <= entity.BB.right && this.velocity.x < 0) {
+                                this.x = entity.BB.right;
+                            } else if (this.BB.right >= entity.BB.left && this.velocity.x > 0) {
+                                this.x = entity.BB.left - PARAMS.BLOCKWIDTH;
+                            }
+                        }
+
+                        if (entity.state == 14) {
+                            if (this.BB.top <= entity.BB.bottom && this.velocity.y < 0) {
+                                this.y = entity.BB.bottom;
+                            } else if (this.BB.bottom >= entity.BB.top && this.velocity.y > 0) {
+                                this.y = entity.BB.top - PARAMS.BLOCKWIDTH;
+                            }
+                        }
+
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
+                }
             })
 
             if (this.animation[this.state].isDone()) {
@@ -125,13 +149,15 @@ class Player {
     };
 
     draw(ctx) {
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+        if (PARAMS.DEBUG) {
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
-        ctx.strokeStyle = "purple";
-        ctx.strokeRect((this.x + (16 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+            ctx.strokeStyle = "purple";
+            ctx.strokeRect((this.x + (16 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
 
-        ctx.strokeRect((this.x - (20 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+            ctx.strokeRect((this.x - (20 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+        }
 
         if (this.facing == -1) {
             ctx.save();

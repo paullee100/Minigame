@@ -29,6 +29,10 @@ class Fence {
     };
 
     draw(ctx) {
+        if (PARAMS.DEBUG) {
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16, 16);
+        }
         ctx.drawImage(this.spritesheet[this.state], this.x - this.game.camera.x, this.y - this.game.camera.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
     };
 }
