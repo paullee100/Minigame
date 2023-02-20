@@ -62,29 +62,34 @@ class Player {
                     this.removeFromWorld = true;
                     
                 }
-            } else if (this.game.keys["A"]) { // move left
-                this.facing = -1;
-                this.state = 1;
-                this.velocity.x = -RUN;
+            }
+            if (this.state !== 2) {
+                if (this.game.keys["A"]) { // move left
+                    this.facing = -1;
+                    this.state = 1;
+                    this.velocity.x = -RUN;
 
-            } else if (this.game.keys["D"]) { // move right
-                this.facing = 1;
-                this.state = 1;
-                this.velocity.x = RUN;
+                } else if (this.game.keys["D"]) { // move right
+                    this.facing = 1;
+                    this.state = 1;
+                    this.velocity.x = RUN;
 
-            } else if (this.game.keys["W"]) { // move up
-                this.state = 1;
-                this.velocity.y = -RUN;
-            } else if (this.game.keys["S"]) { // move down
-                this.state = 1;
-                this.velocity.y = RUN;
-            } else if (this.game.keys["K"] || this.game.click) { // attack
-                this.state = 2
-            } else {
-                this.state = 0;
-                this.velocity.x = 0;
-                this.velocity.y = 0;
-            };
+                } else if (this.game.keys["W"]) { // move up
+                    this.state = 1;
+                    this.velocity.y = -RUN;
+                } else if (this.game.keys["S"]) { // move down
+                    this.state = 1;
+                    this.velocity.y = RUN;
+                } else {
+                    this.state = 0;
+                    this.velocity.x = 0;
+                    this.velocity.y = 0;
+                }
+            }
+
+            if (this.game.keys["K"] || this.game.click) { // attack
+                this.state = 2;
+            }
 
             let secret = false;
             if (this.game.keys["K"] && this.game.keys["Z"]) {
@@ -131,9 +136,6 @@ class Player {
                                 this.y = entity.BB.top - PARAMS.BLOCKWIDTH;
                             }
                         }
-
-                        this.velocity.x = 0;
-                        this.velocity.y = 0;
                     }
                 }
             })
