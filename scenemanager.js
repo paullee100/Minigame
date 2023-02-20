@@ -125,11 +125,11 @@ class SceneManager {
             ctx.fillText("Controls:", 1 * PARAMS.BLOCKWIDTH, 12 * PARAMS.BLOCKWIDTH);
 
             ctx.font = "50px serif";
-            ctx.fillText("W/Up Arrow - Move Up", 2 * PARAMS.BLOCKWIDTH, 16 * PARAMS.BLOCKWIDTH);
-            ctx.fillText("S/Down Arrow - Move Down", 2 * PARAMS.BLOCKWIDTH, 19 * PARAMS.BLOCKWIDTH);
-            ctx.fillText("A/Left Arrow - Move Left", 2 * PARAMS.BLOCKWIDTH, 22 * PARAMS.BLOCKWIDTH);
-            ctx.fillText("D/Right Arrow - Move Right", 2 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
-            ctx.fillText("Mouse click - Attack", 2 * PARAMS.BLOCKWIDTH, 28 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("W - Move Up", 2 * PARAMS.BLOCKWIDTH, 16 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("S - Move Down", 2 * PARAMS.BLOCKWIDTH, 19 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("A - Move Left", 2 * PARAMS.BLOCKWIDTH, 22 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("D - Move Right", 2 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("K/Mouse click - Attack", 2 * PARAMS.BLOCKWIDTH, 28 * PARAMS.BLOCKWIDTH);
 
             ctx.fillText("Press F to play", 23 * PARAMS.BLOCKWIDTH, 46 * PARAMS.BLOCKWIDTH);
 

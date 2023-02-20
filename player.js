@@ -62,23 +62,23 @@ class Player {
                     this.removeFromWorld = true;
                     
                 }
-            } else if (this.game.keys["a"] || this.game.keys["A"] || this.game.keys["ArrowLeft"]) { // move left
+            } else if (this.game.keys["A"]) { // move left
                 this.facing = -1;
                 this.state = 1;
                 this.velocity.x = -RUN;
 
-            } else if (this.game.keys["d"] || this.game.keys["D"] || this.game.keys["ArrowRight"]) { // move right
+            } else if (this.game.keys["D"]) { // move right
                 this.facing = 1;
                 this.state = 1;
                 this.velocity.x = RUN;
 
-            } else if (this.game.keys["w"] || this.game.keys["W"] || this.game.keys["ArrowUp"]) { // move up
+            } else if (this.game.keys["W"]) { // move up
                 this.state = 1;
                 this.velocity.y = -RUN;
-            } else if (this.game.keys["s"] || this.game.keys["S"] || this.game.keys["ArrowDown"]) { // move down
+            } else if (this.game.keys["S"]) { // move down
                 this.state = 1;
                 this.velocity.y = RUN;
-            } else if (this.game.click) { // attack
+            } else if (this.game.keys["K"] || this.game.click) { // attack
                 this.state = 2
             } else {
                 this.state = 0;
@@ -94,7 +94,9 @@ class Player {
             if (secret == true) {
                 this.game.entities.forEach(entity => {
                     if (entity instanceof Slime) {
-                        entity.health -= 50;
+                        if (entity.boss !== true) {
+                            entity.health -= 50;
+                        }
                     }
                 })
                 secret = false;
