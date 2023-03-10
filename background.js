@@ -21,7 +21,7 @@ class Fence {
         this.spritesheet.push(ASSET_MANAGER.getAsset("./sprites/fence/fence14.png"));
         this.spritesheet.push(ASSET_MANAGER.getAsset("./sprites/fence/fence15.png"));
 
-        this.BB = new BoundingBox(this.x, this.y, 16, 16);
+        this.BB = new BoundingBox(this.x, this.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
     };
 
     update() {
@@ -33,7 +33,7 @@ class Fence {
             ctx.strokeStyle = "red";
             ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16, 16);
         }
-        ctx.drawImage(this.spritesheet[this.state], this.x - this.game.camera.x, this.y - this.game.camera.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
+        // ctx.drawImage(this.spritesheet[this.state], this.x - this.game.camera.x, this.y - this.game.camera.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
     };
 }
 
@@ -47,7 +47,7 @@ class Ground {
     };
 
     draw(ctx) {
-        ctx.drawImage(ASSET_MANAGER.getAsset(this.image), this.x - this.game.camera.x, this.y - this.game.camera.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
+        ctx.drawImage(ASSET_MANAGER.getAsset(this.image), this.x - this.game.camera.x, this.y - this.game.camera.y, 1024 * PARAMS.SCALE, 1024 * PARAMS.SCALE);
     };
 }
 

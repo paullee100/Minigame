@@ -36,6 +36,7 @@ ASSET_MANAGER.queueDownload("./sprites/fence/fence14.png");
 ASSET_MANAGER.queueDownload("./sprites/fence/fence15.png");
 
 // ground
+ASSET_MANAGER.queueDownload("./sprites/ground/background.png");
 ASSET_MANAGER.queueDownload("./sprites/ground/ground00.png");
 ASSET_MANAGER.queueDownload("./sprites/ground/ground01.png");
 ASSET_MANAGER.queueDownload("./sprites/ground/ground02.png");

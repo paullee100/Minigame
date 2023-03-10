@@ -6,6 +6,9 @@ class Player {
         this.health = 300;
         this.maxhealth = 300;
         this.damage = 1;
+        this.attackYBB = 22;
+        this.attackXBB = 20;
+        this.experience = 0;
         this.facing = 1; // right = 1, left = -1
         this.state = 0; // idle = 0, walk = 1, attack = 2, dead = 3
 
@@ -24,7 +27,7 @@ class Player {
         this.animation.push(new Animator(this.spritesheet[0], 16, 21, 16, 22, 6, 0.1, 32, false, true));
         this.animation.push(new Animator(this.spritesheet[1], 16, 18, 16, 24, 6, 0.1, 32, false, true));
         this.animation.push(new Animator(this.spritesheet[2], 8, 22, 36, 25, 4, 0.1, 10, false, false));
-        this.animation.push(new Animator(this.spritesheet[3], 11, 26, 22, 19, 3, 0.1, 29, false, true));
+        this.animation.push(new Animator(this.spritesheet[3], 11, 26, 22, 19, 3, 0.1, 29, false, false));
     
         this.updateBB();
     };
@@ -47,105 +50,121 @@ class Player {
     };
 
     update() {
-        if (!this.dead) {
-            const RUN = 500;
+        // When resuming, player won't immediately attack.
+        if (this.game.click != null) {
+            this.game.click = null;
+        }
+        if (!this.game.camera.pause) {
+            if (!this.dead) {
+                const RUN = 500;
 
-            const TICK = this.game.clockTick;
-            if (this.health <= 0) {
-                this.velocity.x = 0;
-                this.velocity.y = 0;
-                this.health = 0;
-                this.state = 3;
-                this.deathCounter += TICK;
-                if (this.deathCounter >= 0.25) {
-                    this.dead = true;
-                    this.removeFromWorld = true;
-                    
-                }
-            }
-            if (this.state !== 2) {
-                if (this.game.keys["A"]) { // move left
-                    this.facing = -1;
-                    this.state = 1;
-                    this.velocity.x = -RUN;
+                const TICK = this.game.clockTick;
+                this.damage *= this.game.camera.additionalStat.Attack;
+                this.attackXBB *= this.game.camera.additionalStat.AttackBoundX;
+                this.attackYBB *= this.game.camera.additionalStat.AttackBoundY;
+                this.health *= this.game.camera.additionalStat.Health;
+                this.maxhealth *= this.game.camera.additionalStat.Health;
 
-                } else if (this.game.keys["D"]) { // move right
-                    this.facing = 1;
-                    this.state = 1;
-                    this.velocity.x = RUN;
-
-                } else if (this.game.keys["W"]) { // move up
-                    this.state = 1;
-                    this.velocity.y = -RUN;
-                } else if (this.game.keys["S"]) { // move down
-                    this.state = 1;
-                    this.velocity.y = RUN;
-                } else {
-                    this.state = 0;
+                if (this.health <= 0 && this.game.camera.additionalStat.Revive == 0) {
                     this.velocity.x = 0;
                     this.velocity.y = 0;
+                    this.health = 0;
+                    this.state = 3;
+                    this.deathCounter += TICK;
+                    if (this.animation[this.state].isDone()) {
+                        this.dead = true;
+                        this.removeFromWorld = true;
+                        
+                    }
+                } else {
+                    this.game.camera.additionalStat.Revive--;
+                    this.health = this.maxhealth;
                 }
-            }
 
-            if (this.game.keys["K"] || this.game.click) { // attack
-                this.state = 2;
-            }
+                if (this.state !== 2) {
+                    if (this.game.keys["A"]) { // move left
+                        this.facing = -1;
+                        this.state = 1;
+                        this.velocity.x = -RUN;
 
-            let secret = false;
-            if (this.game.keys["K"] && this.game.keys["Z"]) {
-                secret = true;
-            };
+                    } else if (this.game.keys["D"]) { // move right
+                        this.facing = 1;
+                        this.state = 1;
+                        this.velocity.x = RUN;
 
-            if (secret == true) {
+                    } else if (this.game.keys["W"]) { // move up
+                        this.state = 1;
+                        this.velocity.y = -RUN;
+                    } else if (this.game.keys["S"]) { // move down
+                        this.state = 1;
+                        this.velocity.y = RUN;
+                    } else {
+                        this.state = 0;
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
+                }
+
+                if (this.game.keys["K"] || this.game.click) { // attack
+                    this.state = 2;
+                }
+
+                let secret = false;
+                if (this.game.keys["K"] && this.game.keys["Z"]) {
+                    secret = true;
+                };
+
+                if (secret == true) {
+                    this.game.entities.forEach(entity => {
+                        if (entity instanceof Slime) {
+                            if (entity.boss !== true) {
+                                entity.health -= 50;
+                            }
+                        }
+                    })
+                    secret = false;
+                }
+
+                this.x += this.velocity.x * TICK;
+                this.y += this.velocity.y * TICK;
+                this.updateBB();
+
                 this.game.entities.forEach(entity => {
-                    if (entity instanceof Slime) {
-                        if (entity.boss !== true) {
-                            entity.health -= 50;
+                    if (entity.BB && this.SwordBB.collide(entity.BB)) {
+                        if (entity instanceof Slime && this.state == 2) {
+                            entity.health -= this.damage;
+                            entity.state = 3;
+                        }
+                    }
+                    
+                    if (entity.BB && this.BB.collide(entity.BB)) {
+                        if (entity instanceof Fence) {
+                            if (entity.state == 4) {
+                                if (this.BB.left <= entity.BB.right && this.velocity.x < 0) {
+                                    this.x = entity.BB.right;
+                                } else if (this.BB.right >= entity.BB.left && this.velocity.x > 0) {
+                                    this.x = entity.BB.left - PARAMS.BLOCKWIDTH;
+                                }
+                            }
+
+                            if (entity.state == 14) {
+                                if (this.BB.top <= entity.BB.bottom && this.velocity.y < 0) {
+                                    this.y = entity.BB.bottom;
+                                } else if (this.BB.bottom >= entity.BB.top && this.velocity.y > 0) {
+                                    this.y = entity.BB.top - PARAMS.BLOCKWIDTH;
+                                }
+                            }
                         }
                     }
                 })
-                secret = false;
-            }
 
-            this.x += this.velocity.x * TICK;
-            this.y += this.velocity.y * TICK;
-            this.updateBB();
-
-            this.game.entities.forEach(entity => {
-                if (entity.BB && this.SwordBB.collide(entity.BB)) {
-                    if (entity instanceof Slime && this.state == 2) {
-                        entity.health -= this.damage;
-                        entity.state = 3;
+                if (this.animation[this.state].isDone()) {
+                    let tempState = this.state;
+                    this.state = 0;
+                    this.animation[tempState].elapsedTime = 0;
+                    if (this.game.click != null) {
+                        this.game.click = null;
                     }
-                }
-                
-                if (entity.BB && this.BB.collide(entity.BB)) {
-                    if (entity instanceof Fence) {
-                        if (entity.state == 4) {
-                            if (this.BB.left <= entity.BB.right && this.velocity.x < 0) {
-                                this.x = entity.BB.right;
-                            } else if (this.BB.right >= entity.BB.left && this.velocity.x > 0) {
-                                this.x = entity.BB.left - PARAMS.BLOCKWIDTH;
-                            }
-                        }
-
-                        if (entity.state == 14) {
-                            if (this.BB.top <= entity.BB.bottom && this.velocity.y < 0) {
-                                this.y = entity.BB.bottom;
-                            } else if (this.BB.bottom >= entity.BB.top && this.velocity.y > 0) {
-                                this.y = entity.BB.top - PARAMS.BLOCKWIDTH;
-                            }
-                        }
-                    }
-                }
-            })
-
-            if (this.animation[this.state].isDone()) {
-                let tempState = this.state;
-                this.state = 0;
-                this.animation[tempState].elapsedTime = 0;
-                if (this.game.click != null) {
-                    this.game.click = null;
                 }
             }
         }

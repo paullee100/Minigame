@@ -44,63 +44,64 @@ class Slime {
     };
 
     update() {
-
-        if (this.health <= 0) {
-            this.state = 4;
-            this.deadCounter += this.game.clockTick;
-            if (this.deadCounter >= 0.5) {
-                this.game.camera.slimeDefeat++;
-                this.game.camera.score += 100;
-                this.dead = true;
-                this.removeFromWorld = true;
-                if (this.boss === true) {
-                    this.game.camera.clearEntities();
-                    this.game.camera.win = true;
-                }
-            }
-        } else if (this.state == 1) {
-            let dist = getDistance(this, this.player);
-            this.velocity = {x: (this.player.x - this.x) / dist * this.maxSpeed, y: (this.player.y - this.y) / dist * this.maxSpeed};
-        } else if (this.state == 3) {
-            this.waitTime += this.game.clockTick;
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-            if (this.waitTime >= 0.25) {
-                this.state = 1;
-                this.waitTime = 0;
-            }
-        } else {
-            this.state = 1;
-        }
-
-        if (this.player.x > this.x) { // player is on right side
-            this.facing = 1;
-        } else if (this.player.x < this.x) { // player is on left side
-            this.facing = -1;
-        }
-
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-
-        this.game.entities.forEach(entity => {
-            if (entity.BB && this.BB.collide(entity.BB)) {
-                if (entity instanceof Player) {
-                    this.state = 2;
-                    this.velocity.x = 0;
-                    this.velocity.y = 0;
-                    if (this.animation[this.state].isDone()) {
-                        if (entity.BB && this.BB.collide(entity.BB)) {
-                            entity.health -= this.damage;
-                        }
-                        let tempState = this.state;
-                        this.state = 1;
-                        this.animation[tempState].elapsedTime = 0;
+        if (!this.game.camera.pause) {
+            if (this.health <= 0) {
+                this.state = 4;
+                this.deadCounter += this.game.clockTick;
+                if (this.deadCounter >= 0.5) {
+                    this.game.camera.slimeDefeat++;
+                    this.game.camera.score += 100;
+                    this.dead = true;
+                    this.removeFromWorld = true;
+                    if (this.boss === true) {
+                        this.game.camera.clearEntities();
+                        this.game.camera.win = true;
                     }
                 }
+            } else if (this.state == 1) {
+                let dist = getDistance(this, this.player);
+                this.velocity = {x: (this.player.x - this.x) / dist * this.maxSpeed, y: (this.player.y - this.y) / dist * this.maxSpeed};
+            } else if (this.state == 3) {
+                this.waitTime += this.game.clockTick;
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+                if (this.waitTime >= 0.25) {
+                    this.state = 1;
+                    this.waitTime = 0;
+                }
+            } else {
+                this.state = 1;
             }
-        })
 
-        this.updateBB();
+            if (this.player.x > this.x) { // player is on right side
+                this.facing = 1;
+            } else if (this.player.x < this.x) { // player is on left side
+                this.facing = -1;
+            }
+
+            this.x += this.velocity.x * this.game.clockTick;
+            this.y += this.velocity.y * this.game.clockTick;
+
+            this.game.entities.forEach(entity => {
+                if (entity.BB && this.BB.collide(entity.BB)) {
+                    if (entity instanceof Player) {
+                        this.state = 2;
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                        if (this.animation[this.state].isDone()) {
+                            if (entity.BB && this.BB.collide(entity.BB)) {
+                                entity.health -= this.damage;
+                            }
+                            let tempState = this.state;
+                            this.state = 1;
+                            this.animation[tempState].elapsedTime = 0;
+                        }
+                    }
+                }
+            })
+
+            this.updateBB();
+        }
     };
 
     draw(ctx) {

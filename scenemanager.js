@@ -9,11 +9,23 @@ class SceneManager {
         this.slimeDefeat = 0;
         this.bossSlimeSpawn = false;
 
+        this.additionalStat = {
+            Attack: 1,
+            AttackBoundX: 1,
+            AttackBoundY: 1,
+            Health: 1,
+            Revive: 0,
+        };
+
+        this.maxExperience = 100;
+
         this.spawnTime = 0;
         this.waitTime = 0;
         this.win = false;
         this.gameOver = false;
         this.title = true;
+
+        this.pause = false;
         
         this.x = 0;
         this.y = 0;
@@ -44,15 +56,19 @@ class SceneManager {
             }
         }
 
+        // if (level.Ground) {
+        //     for (let i = 0; i < level.Ground.length; i++) {
+        //         let ground = level.Ground[i];
+        //         for (let row = 0; row < ground.size; row++) {
+        //             for (let col = 0; col < ground.size; col++) {
+        //                 this.game.addEntity(new Ground(this.game, ground.sprite, ground.x + col * PARAMS.BLOCKWIDTH, ground.y + row * PARAMS.BLOCKWIDTH));
+        //             }
+        //         }
+        //     }
+        // }
         if (level.Ground) {
-            for (let i = 0; i < level.Ground.length; i++) {
-                let ground = level.Ground[i];
-                for (let row = 0; row < ground.size; row++) {
-                    for (let col = 0; col < ground.size; col++) {
-                        this.game.addEntity(new Ground(this.game, ground.sprite, ground.x + col * PARAMS.BLOCKWIDTH, ground.y + row * PARAMS.BLOCKWIDTH));
-                    }
-                }
-            }
+            const ground = level.Ground[0];
+            this.game.addEntity(new Ground(this.game, ground.sprite, ground.x * PARAMS.BLOCKWIDTH, ground.y * PARAMS.BLOCKWIDTH));
         }
     };
 
@@ -70,22 +86,34 @@ class SceneManager {
         this.x = this.player.x - midpointwidth;
         this.y = this.player.y - midpointheight;
 
-        if (!this.title && !this.gameOver && !this.win) {
+        if (this.game.keys["Escape"] && this.pause == false) {
+            console.log("pause");
+            this.pause = true;
+            this.game.keys["Escape"] = false;
+        } else if (this.game.keys["Escape"] && this.pause == true) {
+            console.log("resume");
+            this.pause = false;
+            this.game.keys["Escape"] = false;
+        }
 
-            this.second += this.game.clockTick;
-            if (this.second >= 60) {
-                this.second = 0;
-                this.min++;
-            }
+        if (!this.pause) {
+            if (!this.title && !this.gameOver && !this.win) {
 
-            if (this.player.health <= 0) {
-                this.waitTime += this.game.clockTick;
-                if (this.waitTime >= 0.5) {
-                    this.clearEntities();
-                    this.gameOver = true;
+                this.second += this.game.clockTick;
+                if (this.second >= 60) {
+                    this.second = 0;
+                    this.min++;
                 }
+
+                if (this.player.health <= 0) {
+                    this.waitTime += this.game.clockTick;
+                    if (this.waitTime >= 0.5) {
+                        this.clearEntities();
+                        this.gameOver = true;
+                    }
+                }
+                this.spawnSlime();
             }
-            this.spawnSlime();
         }
     };
 
