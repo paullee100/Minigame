@@ -29,7 +29,7 @@ class Slime {
         this.animation.push(new Animator(this.spritesheet[1], 5, 8, 21, 19, 6, 0.1, 11, false, true));
         this.animation.push(new Animator(this.spritesheet[2], 6, 5, 19, 23, 7, 0.1, 13, false, false));
         this.animation.push(new Animator(this.spritesheet[3], 7, 9, 17, 19, 3, 0.1, 15, false, true));
-        this.animation.push(new Animator(this.spritesheet[4], 7, 6, 18, 22, 5, 0.1, 14, false, true));
+        this.animation.push(new Animator(this.spritesheet[4], 7, 6, 18, 22, 5, 0.1, 14, false, false));
     
         this.updateBB();
     };
@@ -44,13 +44,14 @@ class Slime {
     };
 
     update() {
-        if (!this.game.camera.pause) {
+        if (!this.game.camera.screen.pause && !this.game.camera.screen.upgrade) {
             if (this.health <= 0) {
                 this.state = 4;
                 this.deadCounter += this.game.clockTick;
-                if (this.deadCounter >= 0.5) {
+                if (this.animation[this.state].isDone()) {
                     this.game.camera.slimeDefeat++;
                     this.game.camera.score += 100;
+                    this.game.camera.player.expPoint += 100;
                     this.dead = true;
                     this.removeFromWorld = true;
                     if (this.boss === true) {

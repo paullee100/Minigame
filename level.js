@@ -1,5 +1,10 @@
+const title = {
+    Background: [{sprite: "./sprites/title/titleBackground.png", x:0,y:0}]
+}
+
 const level = {
     // Ground: [{sprite: "./sprites/ground/ground30.png", x:0,y:0,size:50}],
+    Player: [{x:500, y:500}],
     Ground: [{sprite: "./sprites/ground/background.png", x:0, y:0}],
     Fence: [
         // left side

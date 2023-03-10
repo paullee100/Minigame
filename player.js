@@ -8,7 +8,7 @@ class Player {
         this.damage = 1;
         this.attackYBB = 22;
         this.attackXBB = 20;
-        this.experience = 0;
+        this.expPoint = 0;
         this.facing = 1; // right = 1, left = -1
         this.state = 0; // idle = 0, walk = 1, attack = 2, dead = 3
 
@@ -54,7 +54,7 @@ class Player {
         if (this.game.click != null) {
             this.game.click = null;
         }
-        if (!this.game.camera.pause) {
+        if (!this.game.camera.screen.pause && !this.game.camera.screen.upgrade) {
             if (!this.dead) {
                 const RUN = 500;
 
@@ -76,7 +76,7 @@ class Player {
                         this.removeFromWorld = true;
                         
                     }
-                } else {
+                } else if (this.health <= 0 && this.game.camera.additionalStat.Revive > 0) {
                     this.game.camera.additionalStat.Revive--;
                     this.health = this.maxhealth;
                 }

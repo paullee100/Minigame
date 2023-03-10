@@ -27,21 +27,21 @@ class Ground {
     };
 
     draw(ctx) {
-
+        ctx.drawImage(ASSET_MANAGER.getAsset(this.image), this.x - this.game.camera.x, this.y - this.game.camera.y, 1024 * PARAMS.SCALE, 1024 * PARAMS.SCALE);
     };
 }
 
-class GroundDecor {
+class Background {
     constructor(game, image, x, y) {
         Object.assign(this, {game, image, x, y});
 
-        };
+    };
 
     update() {
 
     };
 
     draw(ctx) {
-
+        ctx.drawImage(ASSET_MANAGER.getAsset(this.image), this.x, this.y, 1024, 768);
     };
 }

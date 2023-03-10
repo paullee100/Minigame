@@ -2,6 +2,9 @@ const gameEngine = new GameEngine();
 
 const ASSET_MANAGER = new AssetManager();
 
+// title
+ASSET_MANAGER.queueDownload("./sprites/title/titleBackground.png");
+
 // player
 ASSET_MANAGER.queueDownload("./sprites/player_idle.png");
 ASSET_MANAGER.queueDownload("./sprites/player_walk.png");
