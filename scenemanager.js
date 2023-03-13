@@ -120,6 +120,11 @@ class SceneManager {
             this.game.addEntity(this.player);
         }
 
+        if (level.Music && !this.screen.title) {
+            ASSET_MANAGER.pauseBackgroundMusic();
+            ASSET_MANAGER.playAsset(level.Music);
+        }
+
         if (level.Fence) {
             for (let i = 0; i < level.Fence.length; i++) {
                 let fence = level.Fence[i];
@@ -152,6 +157,14 @@ class SceneManager {
         })
     }
 
+    updateAudio() {
+        let mute = document.getElementById("mute").checked;
+        let volume = document.getElementById("volume").value;
+
+        ASSET_MANAGER.muteAudio(mute);
+        ASSET_MANAGER.adjustVolume(volume);
+    }
+
     update() {
         PARAMS.DEBUG = document.getElementById("debug").checked;
 
@@ -159,6 +172,10 @@ class SceneManager {
         let midpointheight = PARAMS.CANVAS_HEIGHT / 2 - PARAMS.BLOCKWIDTH / 2;
         this.x = this.player.x - midpointwidth;
         this.y = this.player.y - midpointheight;
+
+        if (!this.screen.gameplay) {
+            ASSET_MANAGER.pauseBackgroundMusic();
+        }
 
         if (!this.screen.upgrade) {
             if (this.game.keys["Escape"] && this.screen.gameplay && this.screen.pause == false) {
@@ -445,6 +462,7 @@ class SceneManager {
                         }
                     }
                 }
+                this.updateAudio();
                 this.spawnSlime();
             }
         }

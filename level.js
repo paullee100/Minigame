@@ -3,6 +3,7 @@ const title = {
 }
 
 const level = {
+    Music: ["./sound/music/backgroundMusic.mp4"],
     // Ground: [{sprite: "./sprites/ground/ground30.png", x:0,y:0,size:50}],
     Player: [{x:500, y:500}],
     Ground: [{sprite: "./sprites/ground/background.png", x:0, y:0}],

@@ -28,7 +28,12 @@ ASSET_MANAGER.queueDownload("./sprites/slime_dead.png");
 // ground
 ASSET_MANAGER.queueDownload("./sprites/ground/background.png");
 
+// music
+ASSET_MANAGER.queueDownload("./sound/music/backgroundMusic.mp4");
+
 ASSET_MANAGER.downloadAll(() => {
+	
+	ASSET_MANAGER.autoRepeat("./sound/music/backgroundMusic.mp4");
 	PARAMS.BLOCKWIDTH = PARAMS.BITWIDTH * PARAMS.SCALE;
 
 	const canvas = document.getElementById("gameWorld");
