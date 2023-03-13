@@ -15,7 +15,22 @@ class SceneManager {
             Revive: 0,
         };
 
-        this.maxExp = 100;
+        this.upgradeImage = [];
+        this.upgradeImage.push(ASSET_MANAGER.getAsset("./sprites/upgrade/strength.png"));
+        this.upgradeImage.push(ASSET_MANAGER.getAsset("./sprites/upgrade/fishing_rodX.png"));
+        this.upgradeImage.push(ASSET_MANAGER.getAsset("./sprites/upgrade/fishing_rodY.png"));
+        this.upgradeImage.push(ASSET_MANAGER.getAsset("./sprites/upgrade/health_boost.png"));
+        this.upgradeImage.push(ASSET_MANAGER.getAsset("./sprites/upgrade/totem_of_undying.png"));
+
+        // 0 - Attack
+        // 1 - AttackBoundX
+        // 2 - AttackBoundY
+        // 3 - Health
+        // 4 - Revive
+        this.upgrades = [0, 1, 2, 3, 4];
+        this.upgradeSlot = [];
+
+        this.maxExp = 250;
 
         this.clock = {
             min: 0,
@@ -24,7 +39,7 @@ class SceneManager {
 
         this.timers = {
             spawnTime: 0,
-            waitTime: 0,
+            randomTime: 3
         };
 
         this.screen = {
@@ -32,9 +47,11 @@ class SceneManager {
             gameOver: false,
             controls: false,
             objective: false,
+            endless: false,
             pause: false,
             upgrade: false,
-            win: false
+            win: false,
+            gameplay: false
         };
 
         this.titleSelect = {
@@ -57,6 +74,17 @@ class SceneManager {
             title: false
         };
 
+        this.pauseSelect = {
+            resume: false,
+            return: false
+        };
+
+        this.upgradeSelect = {
+            one: false,
+            two: false,
+            three: false
+        };
+
         this.mode = {
             campaign: false,
             endless: false
@@ -68,21 +96,27 @@ class SceneManager {
     };
 
     loadLevel(level) {
-        this.clock.min = 0;
-        this.clock.second = 0;
-        this.player.removeFromWorld = false;
-        this.player.health = 300;
-        this.player.dead = false;
-        this.player.state = 0;
-        this.slimeDefeat = 0;
-        this.bossSlimeSpawn = false;
-        this.score = 0;
-        this.timers.spawnTime = 0;
-        this.timers.waitTime = 0;
-        this.x = 0;
-        this.y = 0;
+        if (level != title) {
+            this.clock.min = 0;
+            this.clock.sec = 0;
+            this.player.expPoint = 0;
+            this.player.removeFromWorld = false;
+            this.player.health = this.player.maxhealth;
+            this.player.dead = false;
+            this.player.state = 0;
+            this.player.x = 500;
+            this.player.y = 500;
+            this.slimeDefeat = 0;
+            this.bossSlimeSpawn = false;
+            this.score = 0;
+            this.maxExp = 250;
+            this.timers.spawnTime = 0;
+            this.x = 0;
+            this.y = 0;
+        }
         if (!this.screen.title && !this.screen.gameOver && !this.screen.controls && !this.screen.objective && !this.screen.win) {
             this.clearBackground();
+            this.screen.gameplay = true;
             this.game.addEntity(this.player);
         }
 
@@ -126,14 +160,16 @@ class SceneManager {
         this.x = this.player.x - midpointwidth;
         this.y = this.player.y - midpointheight;
 
-        if (this.game.keys["Escape"] && this.screen.pause == false) {
-            console.log("pause");
-            this.screen.pause = true;
-            this.game.keys["Escape"] = false;
-        } else if (this.game.keys["Escape"] && this.screen.pause == true) {
-            console.log("resume");
-            this.screen.pause = false;
-            this.game.keys["Escape"] = false;
+        if (!this.screen.upgrade) {
+            if (this.game.keys["Escape"] && this.screen.gameplay && this.screen.pause == false) {
+                console.log("pause");
+                this.screen.pause = true;
+                this.game.keys["Escape"] = false;
+            } else if (this.game.keys["Escape"] && this.screen.gameplay && this.screen.pause == true) {
+                console.log("resume");
+                this.screen.pause = false;
+                this.game.keys["Escape"] = false;
+            }
         }
 
         if (this.screen.title) {
@@ -154,7 +190,7 @@ class SceneManager {
                         this.screen.title = false;
                         this.titleSelect.endless = false;
                         this.mode.endless = true;
-                        this.loadLevel(level);
+                        this.screen.endless = true;
                         if (this.game.click != null) this.game.click = null;
                     }
             } else if (this.game.mouse && this.game.mouse.y < 40 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 35 * PARAMS.BLOCKWIDTH
@@ -193,6 +229,14 @@ class SceneManager {
         if (this.screen.objective) {
             if (this.game.click) {
                 this.screen.objective = false;
+                this.loadLevel(level);
+                if (this.game.click != null) this.game.click = null;
+            }
+        }
+
+        if (this.screen.endless) {
+            if (this.game.click) {
+                this.screen.endless = false;
                 this.loadLevel(level);
                 if (this.game.click != null) this.game.click = null;
             }
@@ -250,52 +294,237 @@ class SceneManager {
             }
         }
 
-        if (!this.screen.title && !this.screen.pause && !this.screen.controls && !this.screen.objective) {
+        if (this.screen.upgrade) {
+            if (this.game.mouse && this.game.mouse.y < 38 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 15 * PARAMS.BLOCKWIDTH
+                && this.game.mouse.x > 0 && this.game.mouse.x < 20 * PARAMS.BLOCKWIDTH) {
+                    this.upgradeSelect.one = true;
+                    if (this.upgradeSelect.one && this.game.click) {
+                        this.upgradeSelect.one = false;
+                        this.screen.upgrade = false;
+                        if (this.upgradeSlot[0] == 0) {
+                            this.additionalStat.Attack += 0.05;
+                            this.player.damage *= this.additionalStat.Attack;
+                        } else if (this.upgradeSlot[0] == 1) {
+                            this.additionalStat.AttackBoundX += 0.025;
+                            this.player.attackXBB *= this.additionalStat.AttackBoundX;
+                        } else if (this.upgradeSlot[0] == 2) {
+                            this.additionalStat.AttackBoundY += 0.025;
+                            this.player.attackYBB *= this.additionalStat.AttackBoundY;
+                        } else if (this.upgradeSlot[0] == 3) {
+                            this.additionalStat.Health = Math.floor(this.additionalStat.Health) + 0.1;
+                            this.player.health = Math.floor(this.player.health * this.additionalStat.Health);
+                            this.player.maxhealth = Math.floor(this.player.maxhealth * this.additionalStat.Health);
+                        } else if (this.upgradeSlot[0] == 4) {
+                            this.additionalStat.Revive++;
+                        }
+                        this.resetUpgradeArray();
+                        if (this.game.click != null) this.game.click = null;
+
+                    }
+
+            } else if (this.game.mouse && this.game.mouse.y < 38 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 15 * PARAMS.BLOCKWIDTH
+                && this.game.mouse.x > 23 * PARAMS.BLOCKWIDTH && this.game.mouse.x < 43 * PARAMS.BLOCKWIDTH) {
+                    this.upgradeSelect.two = true;
+                    if (this.upgradeSelect.two && this.game.click) {
+                        this.upgradeSelect.two = false;
+                        this.screen.upgrade = false;
+                        if (this.upgradeSlot[1] == 0) {
+                            this.additionalStat.Attack += 0.05;
+                            this.player.damage *= this.additionalStat.Attack;
+                        } else if (this.upgradeSlot[1] == 1) {
+                            this.additionalStat.AttackBoundX += 0.025;
+                            this.player.attackXBB *= this.additionalStat.AttackBoundX;
+                        } else if (this.upgradeSlot[1] == 2) {
+                            this.additionalStat.AttackBoundY += 0.025;
+                            this.player.attackYBB *= this.additionalStat.AttackBoundY;
+                        } else if (this.upgradeSlot[1] == 3) {
+                            this.additionalStat.Health = Math.floor(this.additionalStat.Health) + 0.1;
+                            this.player.health = Math.floor(this.player.health * this.additionalStat.Health);
+                            this.player.maxhealth = Math.floor(this.player.maxhealth * this.additionalStat.Health);
+                        } else if (this.upgradeSlot[1] == 4) {
+                            this.additionalStat.Revive++;
+                        }
+                        this.resetUpgradeArray();
+                        if (this.game.click != null) this.game.click = null;
+                    }
+
+            } else if (this.game.mouse && this.game.mouse.y < 38 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 15 * PARAMS.BLOCKWIDTH
+                && this.game.mouse.x > 46 * PARAMS.BLOCKWIDTH && this.game.mouse.x < 66 * PARAMS.BLOCKWIDTH) {
+                    this.upgradeSelect.three = true;
+                    if (this.upgradeSelect.three && this.game.click) {
+                        this.upgradeSelect.three = false;
+                        this.screen.upgrade = false;
+                        if (this.upgradeSlot[2] == 0) {
+                            this.additionalStat.Attack += 0.05;
+                            this.player.damage *= this.additionalStat.Attack;
+                        } else if (this.upgradeSlot[2] == 1) {
+                            this.additionalStat.AttackBoundX += 0.025;
+                            this.player.attackXBB *= this.additionalStat.AttackBoundX;
+                        } else if (this.upgradeSlot[2] == 2) {
+                            this.additionalStat.AttackBoundY += 0.025;
+                            this.player.attackYBB *= this.additionalStat.AttackBoundY;
+                        } else if (this.upgradeSlot[2] == 3) {
+                            this.additionalStat.Health = Math.floor(this.additionalStat.Health) + 0.1;
+                            this.player.health = Math.floor(this.player.health * this.additionalStat.Health);
+                            this.player.maxhealth = Math.floor(this.player.maxhealth * this.additionalStat.Health);
+                        } else if (this.upgradeSlot[2] == 4) {
+                            this.additionalStat.Revive++;
+                        }
+                        this.resetUpgradeArray();
+                        if (this.game.click != null) this.game.click = null;
+                    }
+
+            } else {
+                this.upgradeSelect.one = false;
+                this.upgradeSelect.two = false;
+                this.upgradeSelect.three = false;
+                if (this.game.click != null) this.game.click = null;
+            }
+        }
+
+        if (this.screen.pause && this.screen.gameplay && !this.screen.upgrade) {
+            if (this.game.mouse && this.game.mouse.y < 25 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 20 * PARAMS.BLOCKWIDTH &&
+                this.game.mouse.x > 22 * PARAMS.BLOCKWIDTH && this.game.mouse.x < 42 * PARAMS.BLOCKWIDTH) {
+                    this.pauseSelect.resume = true;
+                    if (this.pauseSelect.resume && this.game.click) {
+                        this.pauseSelect.resume = false;
+                        this.screen.pause = false;
+                        if (this.game.click != null) this.game.click = null;
+                    }
+            } else if (this.game.mouse && this.game.mouse.y < 35 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 30 * PARAMS.BLOCKWIDTH &&
+                this.game.mouse.x > 14 * PARAMS.BLOCKWIDTH && this.game.mouse.x < 50.5 * PARAMS.BLOCKWIDTH) {
+                    this.pauseSelect.return = true;
+                    if (this.pauseSelect.return && this.game.click) {
+                        this.pauseSelect.return = false;
+                        this.screen.pause = false;
+                        this.screen.gameplay = false;
+                        this.clearEntities();
+                        this.screen.title = true;
+                        if (this.game.click != null) this.game.click = null;
+                    }
+            } else {
+                this.pauseSelect.resume = false;
+                this.pauseSelect.return = false;
+                if (this.game.click != null) this.game.click = null;
+            }
+        }
+
+        // gameplay
+        if (this.screen.gameplay && !this.screen.pause & !this.screen.upgrade) {
             if (!this.screen.gameOver && !this.screen.win) {
 
-                this.clock.second += this.game.clockTick;
-                if (this.clock.second >= 60) {
-                    this.clock.second = 0;
+                this.clock.sec += this.game.clockTick;
+                if (this.clock.sec >= 60) {
+                    this.clock.sec = 0;
                     this.clock.min++;
                 }
 
-                if (this.player.health <= 0) {
-                    this.timers.waitTime += this.game.clockTick;
-                    if (this.timers.waitTime >= 0.5) {
-                        this.clearEntities();
-                        this.screen.gameOver = true;
-                    }
+                if (this.player.dead) {
+                    this.clearEntities();
+                    this.screen.gameOver = true;
+                    this.screen.gameplay = false;
                 }
 
                 if (this.player.expPoint >= this.maxExp) {
                     this.screen.upgrade = true;
-                    this.player.expPoint -= this.maxExp;
+                    this.player.expPoint -= Math.floor(this.maxExp);
+                    console.log("player exp: " + this.player.expPoint);
                     this.maxExp *= 1.1
 
+                    if (this.mode.endless) {
+                        if (this.additionalStat.Revive > 0) {
+                            this.upgrades.pop();
+                        }
+
+                        for (let i = 0; i < 3; i++) {
+                            let upgrade = Math.floor(Math.random() * this.upgrades.length);
+                            this.upgradeSlot.push(this.upgrades[upgrade]);
+                            this.upgrades.splice(upgrade, 1);
+                        }
+                    }
                 }
                 this.spawnSlime();
             }
         }
     };
 
+    resetUpgradeArray() {
+        while (this.upgradeSlot.length) {
+            this.upgradeSlot.pop();
+        }
+        this.upgrades = [0, 1, 2, 3, 4];
+    };
+
     spawnSlime() {
         if (!this.screen.gameOver) {
-            if (this.slimeDefeat < 50) {
-                this.timers.spawnTime += this.game.clockTick;
-                if (this.timers.spawnTime >= 2.5) {
-                    let posOrNeg = Math.floor(Math.random() * 2);
-                    let rand = Math.floor((Math.random() * (3)) + 5)
+            if (this.mode.campaign) {
+                if (this.slimeDefeat < 50) {
+                    this.timers.spawnTime += this.game.clockTick;
+                    if (this.timers.spawnTime >= Math.floor(Math.random() * this.timers.randomTime) + 1) {
+                        let posOrNeg = Math.floor(Math.random() * 2);
+                        let rand = Math.floor((Math.random() * (3)) + 5)
 
-                    if (posOrNeg % 2 == 0) {
-                        rand *= -1;
+                        if (posOrNeg % 2 == 0) {
+                            rand *= -1;
+                        }
+
+                        this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, 1, 1, false), 1);
+                        this.timers.spawnTime = 0;
                     }
-
-                    this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, false), 1);
-                    this.timers.spawnTime = 0;
+                } else if (!this.bossSlimeSpawn) {
+                    this.game.addEntityAtIndex(new Slime(this.game, 0, 0, this.player, 1, 1, true), 1);
+                    this.bossSlimeSpawn = true;
                 }
-            } else if (!this.bossSlimeSpawn) {
-                this.game.addEntityAtIndex(new Slime(this.game, 0, 0, this.player, true), 1);
-                this.bossSlimeSpawn = true;
+            } else if (this.mode.endless) {
+                this.timers.spawnTime += this.game.clockTick;
+                if (this.clock.min < 3) {
+                    if (this.timers.spawnTime >= Math.floor(Math.random() * this.timers.randomTime) + 1) {
+                        let posOrNeg = Math.floor(Math.random() * 2);
+                        let rand = Math.floor((Math.random() * 3) + 5);
+
+                        if (posOrNeg % 2 == 0) {
+                            rand *= -1;
+                        }
+
+                        this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, 1, 1, false), 1);
+                        this.timers.spawnTime = 0;
+                    }
+                } else if (this.clock.min >= 3 && this.clock.min < 5) {
+                    if (this.timers.spawnTime >= Math.floor(Math.random() * (this.timers.randomTime - 1)) + 1) {
+                        let posOrNeg = Math.floor(Math.random() * 2);
+                        let rand = Math.floor((Math.random() * 3) + 5);
+
+                        if (posOrNeg % 2 == 0) {
+                            rand *= -1;
+                        }
+                        this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, 1.25, 1.25, false), 1);
+                        this.timers.spawnTime = 0;
+                    }
+                } else if (this.clock.min >= 5 && this.clock.min < 8) {
+                    if (this.timers.spawnTime >= Math.floor(Math.random() * (this.timers.randomTime - 1.5))) {
+                        let posOrNeg = Math.floor(Math.random() * 2);
+                        let rand = Math.floor((Math.random() * 3) + 5);
+
+                        if (posOrNeg % 2 == 0) {
+                            rand *= -1;
+                        }
+
+                        this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, 2, 2, false), 1);
+                        this.timers.spawnTime = 0;
+                    }
+                } else if (this.clock.min >= 8) {
+                    if (this.timers.spawnTime >= Math.floor(Math.random() * (this.timers.randomTime - 2))) {
+                        let posOrNeg = Math.floor(Math.random() * 2);
+                        let rand = Math.floor((Math.random() * 3) + 5);
+
+                        if (posOrNeg % 2 == 0) {
+                            rand *= -1;
+                        }
+
+                        this.game.addEntityAtIndex(new Slime(this.game, (rand * 50) + this.player.x, (rand * 50) + this.player.y, this.player, 3.5, 2.25, false), 1);
+                        this.timers.spawnTime = 0;
+                    }
+                }
             }
         }
     };
@@ -348,6 +577,158 @@ class SceneManager {
             ctx.fillText("2) Defeat the Giant Slime", 1 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
             ctx.fillText("Click anywhere to play", 10 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
 
+        }
+
+        if (this.screen.endless) {
+            ctx.font = "100px serif";
+            ctx.fillStyle = "Black";
+
+            ctx.fillText("Endless: ", 20 * PARAMS.BLOCKWIDTH, 10 * PARAMS.BLOCKWIDTH);
+
+            ctx.font = "75px serif";
+            ctx.fillText("- Survive as long as you can", 1 * PARAMS.BLOCKWIDTH, 15 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("- Kill Slimes to gain EXP", 1 * PARAMS.BLOCKWIDTH, 20 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("- Below is your EXP bar", 1 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("- Fill bar and upgrade stat", 1 * PARAMS.BLOCKWIDTH, 30 * PARAMS.BLOCKWIDTH);
+            ctx.fillText("or get Revive to escape Death", 1 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+
+            ctx.fillStyle = "Red";
+            ctx.fillText("Slimes become stronger overtime", 1 * PARAMS.BLOCKWIDTH, 40 * PARAMS.BLOCKWIDTH);
+
+            ctx.fillStyle = "Black";
+            ctx.fillText("Click anywhere to play", 10 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH);
+        }
+
+        if (this.screen.upgrade) {
+            ctx.font = "100px serif";
+            ctx.fillStyle = "White";
+
+            ctx.fillText("Select 1 of 3 upgrades", 5 * PARAMS.BLOCKWIDTH, 10 * PARAMS.BLOCKWIDTH);
+
+            ctx.font = "50px serif";
+            for (let i = 0; i < 3; i++) {
+                ctx.drawImage(this.upgradeImage[this.upgradeSlot[i]], i * 23 * PARAMS.BLOCKWIDTH, 15 * PARAMS.BLOCKWIDTH, 250, 250);
+                if (i == 0) {
+                    if (this.upgradeSelect.one) {
+                        ctx.fillStyle = "Purple";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    } else {
+                        ctx.fillStyle = "White";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    }
+                } else if (i == 1) {
+                    if (this.upgradeSelect.two) {
+                        ctx.fillStyle = "Purple";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    } else {
+                        ctx.fillStyle = "White";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    }
+                } else if (i == 2) {
+                    if (this.upgradeSelect.three) {
+                        ctx.fillStyle = "Purple";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    } else {
+                        ctx.fillStyle = "White";
+                        if (this.upgradeSlot[i] == 0) {
+                            ctx.fillText("+5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 1) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound X", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 2) {
+                            ctx.fillText("+2.5% Attack", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                            ctx.fillText("Bound Y", i * 23 * PARAMS.BLOCKWIDTH, 38 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 3) {
+                            ctx.fillText("+10% Health", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        } else if (this.upgradeSlot[i] == 4) {
+                            ctx.fillText("+1 Revive", i * 23 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (this.screen.gameplay && this.screen.pause && !this.screen.upgrade) {
+            ctx.font = "100px serif";
+            ctx.fillStyle = "Black";
+
+            ctx.fillText("Paused", 23 * PARAMS.BLOCKWIDTH, 15 * PARAMS.BLOCKWIDTH);
+
+            if (this.pauseSelect.resume) {
+                ctx.fillStyle = "Purple";
+                ctx.fillText("Resume", 22 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
+            } else {
+                ctx.fillStyle = "Black";
+                ctx.fillText("Resume", 22 * PARAMS.BLOCKWIDTH, 25 * PARAMS.BLOCKWIDTH);
+            }
+
+            if (this.pauseSelect.return) {
+                ctx.fillStyle = "Purple";
+                ctx.fillText("Return to Title", 14 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+            } else {
+                ctx.fillStyle = "Black";
+                ctx.fillText("Return to Title", 14 * PARAMS.BLOCKWIDTH, 35 * PARAMS.BLOCKWIDTH);
+            }
         }
 
         if (this.screen.controls) {
@@ -407,6 +788,7 @@ class SceneManager {
             }
 
         } 
+
         if (this.screen.win) {
             this.loadLevel(title);
             ctx.font = "100px serif";
@@ -446,13 +828,18 @@ class SceneManager {
                 ctx.fillText("Go back to Title Screen", 10 * PARAMS.BLOCKWIDTH, 46 * PARAMS.BLOCKWIDTH);
             }
         } 
-        if (!this.screen.title && !this.screen.gameOver && !this.screen.controls && !this.screen.objective && !this.screen.win) {
+
+        if (this.screen.gameplay && !this.screen.upgrade) {
             ctx.font = "45px serif";
             ctx.fillStyle = "White";
             ctx.lineWidth = 2;
             ctx.fillText("Health: " + this.player.health, 1 * PARAMS.BLOCKWIDTH, 3 * PARAMS.BLOCKWIDTH);
             ctx.fillText("Score: " + this.score, 1 * PARAMS.BLOCKWIDTH, 6 * PARAMS.BLOCKWIDTH);
-            ctx.fillText("Slimes defeated: " + this.slimeDefeat + "/50", 1 * PARAMS.BLOCKWIDTH, 9 * PARAMS.BLOCKWIDTH);
+            if (this.mode.campaign) {
+                ctx.fillText("Slimes defeated: " + this.slimeDefeat + "/50", 1 * PARAMS.BLOCKWIDTH, 9 * PARAMS.BLOCKWIDTH);
+            } else {
+                ctx.fillText("Slimes defeated: " + this.slimeDefeat, 1 * PARAMS.BLOCKWIDTH, 9 * PARAMS.BLOCKWIDTH);
+            }
             ctx.fillText(this.clock.sec < 10 ? this.clock.min + ":0" + Math.floor(this.clock.sec) : this.clock.min + ":" + Math.floor(this.clock.sec), 1 * PARAMS.BLOCKWIDTH, 12 * PARAMS.BLOCKWIDTH);
             let ratio = this.player.health / this.player.maxhealth;
             ctx.strokeStyle = "black";
@@ -462,11 +849,34 @@ class SceneManager {
             }
             ctx.strokeRect(15 * PARAMS.BLOCKWIDTH, 1 * PARAMS.BLOCKWIDTH, 10 * PARAMS.BLOCKWIDTH, 2 * PARAMS.BLOCKWIDTH);
 
-            let ratioEXP = this.player.expPoint / this.maxExp;
-            ctx.strokeStyle = "black";
-            ctx.fillStyle = "green";
-            ctx.fillRect(0 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, PARAMS.CANVAS_WIDTH * ratioEXP, 0.5 * PARAMS.BLOCKWIDTH);
-            ctx.strokeRect(0 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, PARAMS.CANVAS_WIDTH, 0.5 * PARAMS.BLOCKWIDTH);
+            if (this.mode.campaign) {
+                let boss = undefined;
+                if (this.bossSlimeSpawn) {
+                    this.game.entities.forEach((entity) => {
+                        if (this.game.Slime.boss) {
+                            boss = this.game.Slime;
+                        }
+                    });
+
+                    ctx.fillStyle = "White";
+                    ctx.fillText("The Ultimate Slime", 2 * PARAMS.BLOCKWIDTH, 44 * PARAMS.BLOCKWIDTH);
+                    let ratio = boss.health / boss.maxhealth;
+                    ctx.strokeStyle = "White";
+                    ctx.fillStyle = ratio < 0.2 ? "Red" : ratio < 0.5 ? "yellow" : "green";
+                    if (boss.health > 0) {
+                        ctx.fillRect(2 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, 60 * PARAMS.BLOCKWIDTH * ratio, 2 * PARAMS.BLOCKWIDTH);
+                    }
+                    ctx.strokeRect(2 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, 60 * PARAMS.BLOCKWIDTH, 2 * PARAMS.BLOCKWIDTH);
+                }
+            }
+
+            if (this.mode.endless) {
+                let ratioEXP = this.player.expPoint / this.maxExp;
+                ctx.strokeStyle = "White";
+                ctx.fillStyle = "Red";
+                ctx.fillRect(0 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, PARAMS.CANVAS_WIDTH * ratioEXP, 0.5 * PARAMS.BLOCKWIDTH);
+                ctx.strokeRect(0 * PARAMS.BLOCKWIDTH, 45 * PARAMS.BLOCKWIDTH, PARAMS.CANVAS_WIDTH, 0.5 * PARAMS.BLOCKWIDTH);
+            }
         }
     };
 };

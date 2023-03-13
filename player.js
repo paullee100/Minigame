@@ -6,8 +6,8 @@ class Player {
         this.health = 300;
         this.maxhealth = 300;
         this.damage = 1;
-        this.attackYBB = 22;
-        this.attackXBB = 20;
+        this.attackYBB = 44;
+        this.attackXBB = 40;
         this.expPoint = 0;
         this.facing = 1; // right = 1, left = -1
         this.state = 0; // idle = 0, walk = 1, attack = 2, dead = 3
@@ -38,49 +38,36 @@ class Player {
 
         if (this.state == 2) {
             if (this.facing == 1) {
-                this.SwordBB = new BoundingBox((this.x + (16 * PARAMS.SCALE)), this.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+                this.SwordBB = new BoundingBox((this.x + (32 * PARAMS.SCALE)), this.y, this.attackXBB * PARAMS.SCALE, this.attackYBB * PARAMS.SCALE);
             } else if (this.facing == -1) {
-                this.SwordBB = new BoundingBox((this.x - (20 * PARAMS.SCALE)), this.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+                this.SwordBB = new BoundingBox((this.x - (40 * PARAMS.SCALE)), this.y, this.attackXBB * PARAMS.SCALE, this.attackYBB * PARAMS.SCALE);
             }
         } else {
             this.SwordBB = new BoundingBox(0, 0, 0, 0);
         }
-        this.BB = new BoundingBox(this.x, this.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+        this.BB = new BoundingBox(this.x, this.y, 32 * PARAMS.SCALE, 44 * PARAMS.SCALE);
 
     };
 
     update() {
-        // When resuming, player won't immediately attack.
-        if (this.game.click != null) {
-            this.game.click = null;
-        }
         if (!this.game.camera.screen.pause && !this.game.camera.screen.upgrade) {
-            if (!this.dead) {
-                const RUN = 500;
+            if (this.game.click != null) this.game.click = null;
 
-                const TICK = this.game.clockTick;
-                this.damage *= this.game.camera.additionalStat.Attack;
-                this.attackXBB *= this.game.camera.additionalStat.AttackBoundX;
-                this.attackYBB *= this.game.camera.additionalStat.AttackBoundY;
-                this.health *= this.game.camera.additionalStat.Health;
-                this.maxhealth *= this.game.camera.additionalStat.Health;
-
-                if (this.health <= 0 && this.game.camera.additionalStat.Revive == 0) {
-                    this.velocity.x = 0;
-                    this.velocity.y = 0;
-                    this.health = 0;
-                    this.state = 3;
-                    this.deathCounter += TICK;
-                    if (this.animation[this.state].isDone()) {
-                        this.dead = true;
-                        this.removeFromWorld = true;
-                        
-                    }
-                } else if (this.health <= 0 && this.game.camera.additionalStat.Revive > 0) {
-                    this.game.camera.additionalStat.Revive--;
-                    this.health = this.maxhealth;
+            const RUN = 500;
+            const TICK = this.game.clockTick;
+            if (this.health <= 0 && this.game.camera.additionalStat.Revive == 0) {
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+                this.health = 0;
+                this.state = 3;
+                if (this.animation[this.state].isDone()) {
+                    this.dead = true;
+                    this.removeFromWorld = true;                        
                 }
-
+            } else if (this.health <= 0 && this.game.camera.mode.endless && this.game.camera.additionalStat.Revive > 0) {
+                this.game.camera.additionalStat.Revive--;
+                this.health = this.maxhealth;
+            } else {
                 if (this.state !== 2) {
                     if (this.game.keys["A"]) { // move left
                         this.facing = -1;
@@ -143,7 +130,7 @@ class Player {
                                 if (this.BB.left <= entity.BB.right && this.velocity.x < 0) {
                                     this.x = entity.BB.right;
                                 } else if (this.BB.right >= entity.BB.left && this.velocity.x > 0) {
-                                    this.x = entity.BB.left - PARAMS.BLOCKWIDTH;
+                                    this.x = entity.BB.left - 2 * PARAMS.BLOCKWIDTH;
                                 }
                             }
 
@@ -151,21 +138,20 @@ class Player {
                                 if (this.BB.top <= entity.BB.bottom && this.velocity.y < 0) {
                                     this.y = entity.BB.bottom;
                                 } else if (this.BB.bottom >= entity.BB.top && this.velocity.y > 0) {
-                                    this.y = entity.BB.top - PARAMS.BLOCKWIDTH;
+                                    this.y = entity.BB.top - 3 * PARAMS.BLOCKWIDTH;
                                 }
                             }
                         }
                     }
                 })
-
-                if (this.animation[this.state].isDone()) {
-                    let tempState = this.state;
-                    this.state = 0;
-                    this.animation[tempState].elapsedTime = 0;
-                    if (this.game.click != null) {
-                        this.game.click = null;
-                    }
-                }
+            }
+        }
+        if (this.animation[this.state].isDone()) {
+            let tempState = this.state;
+            this.state = 0;
+            this.animation[tempState].elapsedTime = 0;
+            if (this.game.click != null) {
+                this.game.click = null;
             }
         }
 
@@ -174,12 +160,12 @@ class Player {
     draw(ctx) {
         if (PARAMS.DEBUG) {
             ctx.strokeStyle = "red";
-            ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 16 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+            ctx.strokeRect(this.x - this.game.camera.x, this.y - this.game.camera.y, 32 * PARAMS.SCALE, 44 * PARAMS.SCALE);
 
             ctx.strokeStyle = "purple";
-            ctx.strokeRect((this.x + (16 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+            ctx.strokeRect((this.x + (32 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 40 * PARAMS.SCALE, 44 * PARAMS.SCALE);
 
-            ctx.strokeRect((this.x - (20 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 20 * PARAMS.SCALE, 22 * PARAMS.SCALE);
+            ctx.strokeRect((this.x - (40 * PARAMS.SCALE)) - this.game.camera.x, this.y - this.game.camera.y, 40 * PARAMS.SCALE, 44 * PARAMS.SCALE);
         }
 
         if (this.facing == -1) {
@@ -194,11 +180,11 @@ class Player {
         let stateModY = 0;
 
         if (this.dead == true) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 2 * PARAMS.SCALE);
         } else if (this.facing == 1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x - stateModX) - this.game.camera.x, (this.y - stateModY) - this.game.camera.y, 2 * PARAMS.SCALE);
         } else if (this.facing == -1) {
-            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - (16 * PARAMS.SCALE) + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, PARAMS.SCALE);
+            this.animation[this.state].drawFrame(this.game.clockTick, ctx, (this.x * this.facing) - (32 * PARAMS.SCALE) + (stateModX * this.facing) - (this.game.camera.x * this.facing), (this.y - stateModY) - this.game.camera.y, 2 * PARAMS.SCALE);
         }
         ctx.restore();
     };

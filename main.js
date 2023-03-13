@@ -11,14 +11,19 @@ ASSET_MANAGER.queueDownload("./sprites/player_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/player_attack.png");
 ASSET_MANAGER.queueDownload("./sprites/player_dead.png");
 
+// upgrades
+ASSET_MANAGER.queueDownload("./sprites/upgrade/strength.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade/fishing_rodX.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade/fishing_rodY.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade/health_boost.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade/totem_of_undying.png");
+
 // enemies
 ASSET_MANAGER.queueDownload("./sprites/slime_idle.png");
 ASSET_MANAGER.queueDownload("./sprites/slime_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/slime_attack.png");
 ASSET_MANAGER.queueDownload("./sprites/slime_hurt.png");
 ASSET_MANAGER.queueDownload("./sprites/slime_dead.png");
-
-// background //
 
 // ground
 ASSET_MANAGER.queueDownload("./sprites/ground/background.png");
