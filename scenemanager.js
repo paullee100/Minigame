@@ -173,6 +173,8 @@ class SceneManager {
         }
 
         if (this.screen.title) {
+            this.mode.campaign = false;
+            this.mode.endless = false;
             if (this.game.mouse && this.game.mouse.y < 20 * PARAMS.BLOCKWIDTH && this.game.mouse.y > 15 * PARAMS.BLOCKWIDTH
                 && this.game.mouse.x > 11 * PARAMS.BLOCKWIDTH && this.game.mouse.x < 53 * PARAMS.BLOCKWIDTH) {
                     this.titleSelect.campaign = true;
